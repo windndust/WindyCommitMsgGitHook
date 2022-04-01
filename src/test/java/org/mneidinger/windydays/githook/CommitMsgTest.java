@@ -2,6 +2,8 @@ package org.mneidinger.windydays.githook;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +20,7 @@ public class CommitMsgTest {
 		String out = SystemLambda.tapSystemOut( () -> {
 			status.add( 
 				SystemLambda.catchSystemExit( () -> {
-					commitmsg.validateCommitMessage("src/test/resources/msg_header_valid_length");
+					commitmsg.validateCommitMsgHeaderAndSecondLine(new File("src/test/resources/msg_header_valid_length"));
 				})
 			);
 		});
@@ -32,7 +34,7 @@ public class CommitMsgTest {
 		String out = SystemLambda.tapSystemOut( () -> {
 			status.add( 
 				SystemLambda.catchSystemExit( () -> {
-					commitmsg.validateCommitMessage("src/test/resources/msg_three_line_valid");
+					commitmsg.validateCommitMsgHeaderAndSecondLine(new File("src/test/resources/msg_three_line_valid"));
 				})
 			);
 		});
@@ -46,7 +48,7 @@ public class CommitMsgTest {
 		String out = SystemLambda.tapSystemOut( () -> {
 			status.add( 
 				SystemLambda.catchSystemExit( () -> {
-					commitmsg.validateCommitMessage("src/test/resources/msg_header_too_long");
+					commitmsg.validateCommitMsgHeaderAndSecondLine(new File("src/test/resources/msg_header_too_long"));
 				})
 			);
 		});
@@ -60,7 +62,7 @@ public class CommitMsgTest {
 		String out = SystemLambda.tapSystemOut( () -> {
 			status.add( 
 				SystemLambda.catchSystemExit( () -> {
-					commitmsg.validateCommitMessage("src/test/resources/msg_second_line_not_blank");
+					commitmsg.validateCommitMsgHeaderAndSecondLine(new File("src/test/resources/msg_second_line_not_blank"));
 				})
 			);
 		});
@@ -68,4 +70,8 @@ public class CommitMsgTest {
 		assertEquals("Commit message header length: 44"+System.lineSeparator()+"Second line of commit message is not blank. Please add blank second line to separate message header from body."+System.lineSeparator(), out);
 	}
 	
+	@Test
+	public void testThirdToManyLines() throws FileNotFoundException {
+		commitmsg.autoFormatThirdToManyLines(new File("src/test/resources/msg_third_to_many_lines"));
+	}
 }

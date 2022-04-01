@@ -2,16 +2,30 @@ package org.mneidinger.windydays.githook;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class CommitMsgHook {
 
 	public static void main(String[] args) throws Exception{
-		new CommitMsgHook().validateCommitMessage(args[0]);
+		new CommitMsgHook().processHook(args[0]);
 	}
 	
-	public void validateCommitMessage(String commitEditMsgFileLocation) throws FileNotFoundException {
+	private boolean thirdToManyLines;
+	
+	public void processHook(String commitEditMsgFileLocation) throws FileNotFoundException {
 		File commitMessageFile = new File(commitEditMsgFileLocation);
+		validateCommitMsgHeaderAndSecondLine(commitMessageFile);
+		if(isThirdToManyLines()) {
+			autoFormatThirdToManyLines(commitMessageFile);
+		}
+		System.exit(0);
+	}
+	
+	public void validateCommitMsgHeaderAndSecondLine(File commitMessageFile) throws FileNotFoundException {
 		Scanner validateScan = new Scanner(commitMessageFile);
 		
 		String line = validateScan.nextLine();
@@ -28,10 +42,58 @@ public class CommitMsgHook {
 				validateScan.close();
 				System.exit(1);
 			}
+			thirdToManyLines = validateScan.hasNextLine();
 		}
 		
 		System.out.println("Commit message passes validation");
 		validateScan.close();
-		System.exit(0);
+	}
+	
+	public boolean isThirdToManyLines() {
+		return thirdToManyLines;
+	}
+	
+	public void autoFormatThirdToManyLines(File commitMessageFile) throws FileNotFoundException {
+		Scanner readLines = new Scanner(commitMessageFile);
+
+		VisitConsumer vc = new VisitConsumer();
+		vc.addLine(readLines.nextLine());
+		vc.addLine(readLines.nextLine());
+		
+		readLines.forEachRemaining(s -> vc.accept(s));
+		vc.flush();
+		readLines.close(); 
+		
+		PrintWriter pw = new PrintWriter(commitMessageFile);
+		vc.getLinesToPrint().stream().forEach(line -> pw.println(line));
+		
+		pw.close();
+	}
+	
+	private class VisitConsumer implements Consumer<String>{
+
+		private List<String> linesToPrint = new ArrayList<String>();
+		private StringBuilder line = new StringBuilder();
+		
+		private void addLine(String line) {
+			linesToPrint.add(line);
+		}
+		
+		@Override
+		public void accept(String word) {
+			if(line.length() + word.length() + 1 > 100) {
+				flush();
+			}
+			line.append(word).append(" ");
+		}
+			
+		private void flush() {
+			linesToPrint.add(line.toString().strip());
+			line.delete(0, line.length());
+		}
+		
+		private List<String> getLinesToPrint(){
+			return linesToPrint;
+		}
 	}
 }
