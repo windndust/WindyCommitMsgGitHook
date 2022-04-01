@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mneidinger.githook</groupId>
   <artifactId>WindyCommitMsgGitHook</artifactId>
-  <version>1.0.0-RELEASE</version>
+  <version>1.0.1-SNAPSHOT</version>
 	
 	<properties>
 	    <maven.compiler.target>17</maven.compiler.target>
