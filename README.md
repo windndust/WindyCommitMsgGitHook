@@ -8,5 +8,5 @@ Prerequisite: git init already used in project to create .git directory
 Install is now complete and your commit messages will now be validated
 
 Usage Prerequisite:
-*Java 11 installed - allows execution of uncompiled main classes
-*Java directory added to Path variable - allows shell to execute java commands
+1. Java 11 installed - allows execution of uncompiled main classes
+2. Java directory added to Path variable - allows shell to execute java commands
